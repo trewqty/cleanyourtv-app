@@ -41,8 +41,16 @@ class MainActivity : ComponentActivity() {
                     graph.tvs.load()
                     start = startKey(resolveStart(graph.tvs.tvs.value, graph.seams.journal))
                 }
+                val prefs = remember { getSharedPreferences("shop_promo", MODE_PRIVATE) }
+                var promoDone by remember {
+                    mutableStateOf(!ShopPromoConfig.SHOW_ON_EVERY_START && prefs.getBoolean("seen", false))
+                }
                 val s = start
-                if (s == null) Box(Modifier.fillMaxSize().background(CytTheme.colors.bg))
+                if (!promoDone) ShopPromoScreen(onContinue = {
+                    prefs.edit().putBoolean("seen", true).apply()
+                    promoDone = true
+                })
+                else if (s == null) Box(Modifier.fillMaxSize().background(CytTheme.colors.bg))
                 else AppRoot(graph, s, onExit = { finish() })
             }
         }
